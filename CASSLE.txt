@@ -1,0 +1,303 @@
+CASSANDRA
+
+1] Creating Keyspace(Database)
+   CREATE KEYSPACE hr WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};
+   CREATE KEYSPACE hr WITH replication = {'class': 'NetworTopologyStartegy', ‘DC1’:1,’DC2’:3} and durable_writes=false;
+
+   CREATE KEYSPACE hr_new 
+   WITH replication = {
+  'class': 'SimpleStrategy', 
+  'replication_factor': 1
+   };
+
+
+2] USE hr_new;  (Using Database)
+
+3] CREATE TABLE employees (
+   id UUID PRIMARY KEY,
+   name TEXT,
+   role TEXT
+   );
+ 
+INSERT INTO employees (id, name, role) VALUES (uuid(), 'Ravi', 'Manager');
+SELECT * FROM employees;
+
+
+
+4] cqlsh:hr_new> CREATE TABLE customer (
+          ...   customer_id INT PRIMARY KEY,
+          ...   name TEXT,
+          ...   email TEXT,
+          ...   phone TEXT,
+          ...   city TEXT
+          ... );
+  cqlsh:hr_new> INSERT INTO customer (customer_id, name, email, phone, city)
+          ... VALUES (1, 'Ravi Kumar', 'ravi@example.com', '9876543210', 'Pune');
+
+5] UUID = INT/BIGINT/SERIAL (Basically for primary key)
+   TEXT = VARCHAR
+   LIST<T> = ARRAY 
+   ASCII =CHAR / VARCHAR
+
+
+
+6] cqlsh:hr_new> CREATE TABLE customer_by_city (
+          ...   city TEXT,
+          ...   customer_id INT,
+          ...   name TEXT,
+          ...   email TEXT,
+          ...   phone TEXT,
+          ...   PRIMARY KEY ((city), customer_id)
+          ... );
+   cqlsh:hr_new> INSERT INTO customer_by_city (city, customer_id, name, email, phone)
+          ... VALUES ('Pune', 1, 'Ravi Kumar', 'ravi@example.com', '9876543210');
+
+
+7] DESC TABLE customer_by_city;
+
+
+8] ALTER TABLE customer_by_city ADD manager_desc TEXT;
+
+
+9] ALTER TABLE customer_by_city DROP manager_desc;
+
+
+10] Alter table emp alter manager_desc text; (for changing data types its must be similar one)
+ 
+
+11] ALTER TABLE customer_by_city DROP manager_desc;
+  
+
+12] TRUNCATE customer_by_city;
+
+ 
+13] UPDATE customer_by_city 
+    SET phone = '9998887776', email = 'ravi.new@example.com' 
+    WHERE city = 'Pune' AND customer_id = 1;
+
+
+14] DELETE FROM customer_by_city 
+    WHERE city = 'Pune' AND customer_id = 1;        (NEED TO USE ALL THOSE PARTIONKEY ALWAYS IN A A SPECIFIC ORDER)
+
+
+15] SELECT * FROM customer_by_city 
+    WHERE city = 'Pune' 
+    ORDER BY customer_id DESC;
+
+
+16]	Set ---
+	a. stores unique values
+	b. Represent in {}
+	c. Mutable
+	d. No indexing is possible
+ 
+
+	CREATE TABLE student (
+        Id INT PRIMARY KEY,
+        Name TEXT,
+        Courses SET<TEXT>
+	);
+
+	INSERT INTO student (Id, Name, Courses) VALUES (1, 'Ravi Kumar', {'Math', 'Science'});
+	INSERT INTO student (Id, Name, Courses) VALUES (2, 'Priya Mehta', {'English', 'History'});
+	INSERT INTO student (Id, Name, Courses) VALUES (3, 'Amit Desai', {'Physics', 'Chemistry'});
+	INSERT INTO student (Id, Name, Courses) VALUES (4, 'Neha Joshi', {'Biology', 'Math'});
+	INSERT INTO student (Id, Name, Courses) VALUES (5, 'Rahul Verma', {'Computer Science', 'Economics'});
+
+
+	UPDATE student 
+	SET courses = {'a', 'b', 'c', 'd'}        (Chnaging whole data)
+	WHERE Id = 1;
+
+
+	UPDATE student 
+	SET courses = courses + {'a', 'b', 'c', 'd'} (adding data by preserving previous one)
+	WHERE Id = 2;
+
+
+	UPDATE student 
+	SET courses = courses - {'Physics'} 	(deleting only physics from specific record)
+	WHERE Id = 3;
+
+
+	UPDATE student 
+	SET courses = {} 
+	WHERE Id = 4;
+
+
+	DELETE courses 
+	FROM student 
+	WHERE Id = 5;
+
+
+
+17]	List
+	
+	a. Uses []
+	b. Duplicates are allowed
+	c. Ordered collection, indexing is possible
+	d. Mutable
+
+	INSERT INTO emp11 (Id, Name, Companies) 
+	VALUES (11, 'Rajan', ['Cognizant', 'Capgemini', 'Tech-M']);
+
+	UPDATE emp11 
+	SET Companies = ['Wipro'] + Companies (add at begining)
+	WHERE Id = 11;
+
+	UPDATE emp11 
+	SET Companies = Companies + ['Wipro'] (add at end)
+	WHERE Id = 11;
+
+	UPDATE emp11 
+	SET Companies[1] = 'Wipro'  (at particular position)
+	WHERE Id = 7;
+
+	
+
+
+
+18]	Map ------
+
+	a. Store data in key value format
+	b. Keys should be unique
+	c. Data is stored in {}
+	d. Values can bw retrieved by using keys
+
+	CREATE TABLE empdata (
+	id INT PRIMARY KEY,
+	name TEXT,
+	companies MAP<TEXT, INT>
+	);
+
+	INSERT INTO empdata (id, name, companies) VALUES (101, 'Ravi', {'TCS': 3, 'Infosys': 2});
+
+	UPDATE empdata 
+	SET companies = companies + {'Accenture': 5}  (insert new key value pair)
+	WHERE id = 108;
+
+	UPDATE empdata 
+	SET companies['Oracle'] = 4  (update existing value)
+	WHERE id = 104;
+
+	DELETE companies['Uber'] 
+	FROM empdata 
+	WHERE id = 109;
+
+	UPDATE empdata 
+	SET companies = companies - {'Adobe', 'Intel'}  (deleting multiple values)
+	WHERE id = 107;
+
+	
+
+19]	Tuple
+
+	a. Duplicates are allowed
+	b. Uses()
+	c. Ordered collection,Indexing is possible
+	d. Tuples are immutable
+
+	
+	CREATE TABLE trainee (
+  	id INT PRIMARY KEY,
+  	name TEXT,
+  	marks TUPLE<INT, TEXT, TUPLE<INT, INT, INT>>
+	);
+
+
+	INSERT INTO studdata (id, name, marks) VALUES (1, 'Amit', (85, 'B', 90));
+
+	UPDATE studdata 
+	SET marks = (1, 'xx', 2) 
+	WHERE id = 1;
+
+
+	DELETE marks 
+	FROM trainee 
+	WHERE id = 11;
+	
+
+	UPDATE trainee 
+	SET marks = (10, 'a', (12, 13, 15)) 
+	WHERE id = 11;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
