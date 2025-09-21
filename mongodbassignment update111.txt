@@ -1,0 +1,144 @@
+use myDatabase
+use myDatabase
+
+db.users.insertMany([
+  { name: "Amit", age: 22 },
+  { name: "Neha", age: 27 },
+  { name: "Raj", age: 35 }
+])
+
+
+db.myCollection.insertOne({ name: "John", age: 30 })
+
+db.users.find()
+db.users.find({ age: { $gt: 25 } })
+
+db.users.updateOne(
+  { name: "Amit" },
+  { $set: { age: 23 } }
+)
+
+db.students.updateOne(
+  { name: "Neha" },
+  { $push: { subjects: "English" } }
+)
+
+
+
+db.users.updateMany(
+  { age: { $lt: 30 } },
+  { $inc: { age: 1 } }
+)
+
+db.users.deleteOne({ name: "Raj" })
+
+db.users.deleteMany({ age: { $gt: 30 } })
+
+
+db.users.drop()
+
+db.dropDatabase()
+
+
+db.users.aggregate([
+  { $match: { age: { $gte: 25 } } },
+  { $group: { _id: "$city", count: { $sum: 1 } } }
+])
+
+
+
+db.students.deleteMany({ age: { $gt: 21 } })
+
+
+db.students.aggregate([
+  { $group: { _id: "$grade", count: { $sum: 1 } } }
+])
+
+
+$match	Filters documents (like find)	{ $match: { age: { $gt: 20 } } }
+$group	Groups documents by a field and performs operations	{ $group: { _id: "$grade", count: { $sum: 1 } } }
+$project	Reshapes documents, includes/excludes fields	{ $project: { name: 1, age: 1 } }
+$sort	Sorts documents	{ $sort: { age: -1 } }
+$limit	Limits number of documents	{ $limit: 5 }
+$skip	Skips number of documents	{ $skip: 5 } }
+
+
+ARRAY QUERIES
+db.students.insertOne({
+  name: "Karan",
+  subjects: ["Math", "Science", "English"]
+})
+
+
+NESTED QUERIES
+db.students.insertOne({
+  name: "Priya",
+  age: 23,
+  address: {
+    street: "MG Road",
+    city: "Pune",
+    zip: 411001
+  }
+})
+
+IN NOTIN
+db.students.find({ grade: { $in: ["A", "B"] } })
+
+
+sort
+db.students.find().sort({ age: -1 }) // Descending
+db.students.find().sort({ name: 1 }) // Ascending
+
+
+
+
+
+
+
+
+Create a Employee Collection add 5 documents:
+Example:
+{emono:111,ename:"Deepali Vaidya",sal:40000.00,dept:{deptno:12,dname:,"Hr",dloc:"Mumbai},
+Desg:"Analyst",mgr:{name:"Satish",num:111},project:[{name:"Project- 1",Hrs:4},{name:"project- 2",Hrs:4}]}
+
+1. All Employee's with the desg as 'CLERK' are now called as (AO) Administrative Officers. Update the Employee collection for this.
+2. Change the number of hours for project-1 to 5 for all employees with designation analyst.
+3. Add 2 projects project-3 and project-4 for employee whose name starts with "Deep" with 2 hrs db.emp.update({name:/^Deep/},{$push:{project:{$each:[{name:'project-
+3',Hrs:2},{name:'project-4',Hrs:2}]}}},
+{multi:true})
+4. Add bonus rs 2000 for all employees with salary > 50000
+5. add bonus 1500 if salary <50000 and > 30000
+6. add bonus 1000 if salary <=30000
+7. Change manager name to Tushar for all employees whose manager is currently "satish"
+And manager number to 3333
+8. Increase salary of all employees from "purchase department" by 15000
+9. Decrease number of hrs by 2 for all employees who are working on project-2
+10. Delete project-2 from all employee document if they are working on the project for 4 hrs.
+db.emp.update({},{$pull:{"project.name":"project-
+2","project.Hrs":4}},{multi:true})
+
+or
+db.Emp.update({},{$pull:{project:{name:'project-2',Hrs:4}}},{multi:true}) or
+
+db.emp.update({},{$pull:{"project:{$elemMatch:{name:"project- 2","Hrs":4}},{multi:true})
+
+
+11. Change the salary of employees to 10000 only if their salary is < 10000
+12. Increase bonus of all employees by 500 if the bonus is <2000 or their salary is < 20000 or if employee belong to sales department
+13. Add 2 new project at position 2 for all employees with designation analyst or salary is equal to either 30000 or 33000 or 35000
+14. Delete last project of all employees with department name is "HR" and if the location is Mumbai
+15. 	Change designation of all employees to senior programmer if they are working on name:"Project-1" for 4 hrs
+16. Add list of hobbies in all employees document whose manager is Rajan or Revati
+17. Add list of skillset in all employee documents who are working on project-4 for 3 hrs or on project-3 for 4 hrs
+18. Add a new hobby as blogging at 3 position in hobbies array for all employess whose name starts with R or p and ends with j or s
+19. Increase salary by 10000 for all employees who are working on project-2 or project-3 or project-1
+
+20. Decrease bonus by 1000 rs And increase salary by 1000rs for all employees whose department location is Mumbai
+21. Remove all employees working on project-1
+22. Replace document of employee with name "Deepak to some new document
+23. Change skill python to python 3.8 for all employees if python is there in the skillset
+24. Add 2 skills MongoDb and Perl at the end of skillset array for all employees who are working at Pune location
+25. Delete first hobby from hobby array for all employees who are working on project-1 or project-2
+26. Delete last hobby from hobbies array for all employees who are working on project which is at 2 nd position in projects array for 4 hrs
+27. Add 2 new projects at the end of array for all employees whose skillset contains Perl or python
+28. Change hrs to 6 for project-1 for all employees if they working on the project-1 for < 6 hrs. otherwise keep the existing value.
